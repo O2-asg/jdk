@@ -149,6 +149,19 @@ address TemplateInterpreterGenerator::generate_ClassCastException_handler() {
   return entry;
 }
 
+// myl
+address TemplateInterpreterGenerator::generate_ECCuncorrectableMemoryException_handler() {
+	address entry = __ pc();
+
+	__ empty_expression_stack();
+
+	__ call_VM(noreg,
+		CAST_FROM_FN_PTR(address,
+		InterpreterRuntime::
+		throw_ECCuncorrectableMemoryException));
+	return entry;
+}
+
 address TemplateInterpreterGenerator::generate_exception_handler_common(
         const char* name, const char* message, bool pass_oop) {
   assert(!pass_oop || message == nullptr, "either oop or message but not both");

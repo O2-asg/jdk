@@ -210,6 +210,7 @@ class SerializeClosure;
                                                                                                   \
   /* exception klasses: at least all exceptions thrown by the VM have entries here */             \
   template(java_lang_ArithmeticException,             "java/lang/ArithmeticException")            \
+  template(java_lang_ECCuncorrectableMemoryException, "java/lang/ECCuncorrectableMemoryException")\
   template(java_lang_ArrayIndexOutOfBoundsException,  "java/lang/ArrayIndexOutOfBoundsException") \
   template(java_lang_ArrayStoreException,             "java/lang/ArrayStoreException")            \
   template(java_lang_ClassCastException,              "java/lang/ClassCastException")             \

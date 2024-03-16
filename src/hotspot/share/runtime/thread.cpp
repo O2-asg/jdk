@@ -138,6 +138,9 @@ Thread::Thread() {
     assert(Thread::current_or_null() == nullptr, "creating thread before barrier set");
   }
 
+  // myl
+  _objtbl = new objTable();
+
   MACOS_AARCH64_ONLY(DEBUG_ONLY(_wx_init = false));
 }
 
@@ -279,6 +282,9 @@ Thread::~Thread() {
   if (this == Thread::current_or_null()) {
     Thread::clear_thread_current();
   }
+
+  // myl
+  delete objtbl();
 
   CHECK_UNHANDLED_OOPS_ONLY(if (CheckUnhandledOops) delete unhandled_oops();)
 }

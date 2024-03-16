@@ -311,6 +311,8 @@ bool PosixSignals::pd_hotspot_signal_handler(int sig, siginfo_t* info,
                  MacroAssembler::uses_implicit_null_check(info->si_addr)) {
           // Determination of interpreter/vtable stub/compiled code null exception
           stub = SharedRuntime::continuation_for_implicit_exception(thread, pc, SharedRuntime::IMPLICIT_NULL);
+      } else if (sig == SIGUSR1) { // EME signal myl
+        stub = SharedRuntime::continuation_for_implicit_exception(thread, pc, SharedRuntime::EME);
       }
     } else if ((thread->thread_state() == _thread_in_vm ||
                 thread->thread_state() == _thread_in_native) &&

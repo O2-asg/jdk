@@ -141,6 +141,7 @@ class Universe: AllStatic {
 
   static OopHandle    _null_ptr_exception_instance;   // preallocated exception object
   static OopHandle    _arithmetic_exception_instance; // preallocated exception object
+  	static OopHandle _eme_exception_instance; // myl
   static OopHandle    _virtual_machine_error_instance; // preallocated exception object
 
   // References waiting to be transferred to the ReferenceHandler
@@ -262,6 +263,7 @@ class Universe: AllStatic {
 
   static oop          null_ptr_exception_instance();
   static oop          arithmetic_exception_instance();
+	static oop    eme_exception_instance();
   static oop          virtual_machine_error_instance();
   static oop          vm_exception()                  { return virtual_machine_error_instance(); }
 

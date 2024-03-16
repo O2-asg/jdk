@@ -529,6 +529,35 @@ JVM_ENTRY(jstring, JVM_GetExtendedNPEMessage(JNIEnv *env, jthrowable throwable))
   }
 JVM_END
 
+// myl
+JVM_ENTRY(jint, JVM_GetBrokenObjectHash(JNIEnv *env, jthrowable throwable))
+	int pid = os::current_process_id();
+	char procfs_name[50], procfs_content[50];
+	uintptr_t addr;
+	oop obj;
+
+	os::snprintf(procfs_name, 50, "/proc/%d_addresses", pid); // get file name
+
+	FILE *fp = fopen(procfs_name, "r");
+	if (fp == NULL) return -1;
+
+	if (fscanf(fp, "%s", procfs_content) < 0) {
+		return -1;
+	}
+	fclose(fp);
+
+	addr = (uintptr_t)strtol(procfs_content, NULL, 0);
+
+	obj = THREAD->objtbl()->getOopFromAddr(addr);
+
+	if (obj != nullptr) {
+		return obj->identity_hash();
+	} else {
+		return -1;
+	}
+JVM_END
+
+
 // java.lang.StackTraceElement //////////////////////////////////////////////
 
 

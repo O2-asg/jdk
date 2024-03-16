@@ -238,12 +238,24 @@ JRT_ENTRY(void, InterpreterRuntime::_new(JavaThread* current, ConstantPool* pool
   //       If we have a breakpoint, then we don't rewrite
   //       because the _breakpoint bytecode would be lost.
   oop obj = klass->allocate_instance(CHECK);
+
+	// myl
+	if (current->is_in_mainthread()) {
+		current->objtbl()->addobjNode(obj->size(), (uintptr_t)obj, obj->identity_hash());
+	}
+
   current->set_vm_result(obj);
 JRT_END
 
 
 JRT_ENTRY(void, InterpreterRuntime::newarray(JavaThread* current, BasicType type, jint size))
   oop obj = oopFactory::new_typeArray(type, size, CHECK);
+
+	// myl
+	if (current->is_in_mainthread()) {
+		current->objtbl()->addobjNode(obj->size(), (uintptr_t)obj, obj->identity_hash());
+	}
+
   current->set_vm_result(obj);
 JRT_END
 
@@ -251,6 +263,12 @@ JRT_END
 JRT_ENTRY(void, InterpreterRuntime::anewarray(JavaThread* current, ConstantPool* pool, int index, jint size))
   Klass*    klass = pool->klass_at(index, CHECK);
   objArrayOop obj = oopFactory::new_objArray(klass, size, CHECK);
+
+	// myl
+	if (current->is_in_mainthread()) {
+		current->objtbl()->addobjNode(obj->size(), (uintptr_t)obj, obj->identity_hash());
+	}
+
   current->set_vm_result(obj);
 JRT_END
 
@@ -279,6 +297,12 @@ JRT_ENTRY(void, InterpreterRuntime::multianewarray(JavaThread* current, jint* fi
     dims[index] = first_size_address[n];
   }
   oop obj = ArrayKlass::cast(klass)->multi_allocate(nof_dims, dims, CHECK);
+
+	// myl
+	if (current->is_in_mainthread()) {
+		current->objtbl()->addobjNode(obj->size(), (uintptr_t)obj, obj->identity_hash());
+	}
+
   current->set_vm_result(obj);
 JRT_END
 
@@ -451,6 +475,8 @@ JRT_ENTRY(void, InterpreterRuntime::throw_ClassCastException(
   // create exception
   THROW_MSG(vmSymbols::java_lang_ClassCastException(), message);
 JRT_END
+
+
 
 // exception_handler_for_exception(...) returns the continuation address,
 // the exception oop (via TLS) and sets the bci/bcp for the continuation.
@@ -652,6 +678,13 @@ JRT_END
 
 JRT_ENTRY(void, InterpreterRuntime::throw_NullPointerException(JavaThread* current))
   THROW(vmSymbols::java_lang_NullPointerException());
+JRT_END
+
+// myl
+JRT_ENTRY(void, InterpreterRuntime::throw_ECCuncorrectableMemoryException(JavaThread* current))
+	ResourceMark rm(current);
+
+	THROW(vmSymbols::java_lang_ECCuncorrectableMemoryException());
 JRT_END
 
 //------------------------------------------------------------------------------------------------------------------------

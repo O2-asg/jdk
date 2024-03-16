@@ -1714,6 +1714,12 @@ JNI_ENTRY(void, jni_CallStaticVoidMethod(JNIEnv *env, jclass cls, jmethodID meth
   va_start(args, methodID);
   JavaValue jvalue(T_VOID);
   JNI_ArgumentPusherVaArg ap(methodID, args);
+
+	// myl
+	if (thread != nullptr && thread->is_Java_thread()) {
+		thread->set_is_in_mainthread(true);
+	}
+
   jni_invoke_static(env, &jvalue, nullptr, JNI_STATIC, methodID, &ap, CHECK);
   va_end(args);
 JNI_END
@@ -3908,6 +3914,9 @@ jint JNICALL jni_DetachCurrentThread(JavaVM *vm)  {
     // Can't detach a thread that's running java, that can't work.
     return JNI_ERR;
   }
+
+	// myl
+	thread->set_is_in_mainthread(false);
 
   // We are going to VM, change W^X state to the expected one.
   MACOS_AARCH64_ONLY(thread->enable_wx(WXWrite));

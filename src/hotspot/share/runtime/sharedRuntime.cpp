@@ -857,6 +857,7 @@ address SharedRuntime::continuation_for_implicit_exception(JavaThread* current,
       case IMPLICIT_NULL:           return Interpreter::throw_NullPointerException_entry();
       case IMPLICIT_DIVIDE_BY_ZERO: return Interpreter::throw_ArithmeticException_entry();
       case STACK_OVERFLOW:          return Interpreter::throw_StackOverflowError_entry();
+      case EME:            return Interpreter::throw_ECCuncorrectableMemoryException_entry(); // myl
       default:                      ShouldNotReachHere();
     }
   } else {
@@ -3105,4 +3106,15 @@ void SharedRuntime::on_slowpath_allocation_exit(JavaThread* current) {
 
   BarrierSet *bs = BarrierSet::barrier_set();
   bs->on_slowpath_allocation_exit(current, new_obj);
+}
+
+// myl
+int SharedRuntime::register_TLAB_object(oopDesc *o) {
+	Thread* cur = Thread::current();
+
+	if (cur->is_in_mainthread()) {
+		// hoge
+	}
+
+	return 0;
 }

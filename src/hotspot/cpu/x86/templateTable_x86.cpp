@@ -4133,6 +4133,12 @@ void TemplateTable::_new() {
       __ pop(atos);
     }
 
+	// myl
+	__ push(atos);
+	__ call_VM_leaf(
+		CAST_FROM_FN_PTR(address, static_cast<int (*)(oopDesc*)>(SharedRuntime::register_TLAB_object)), rax);
+	__ pop(atos);
+
     __ jmp(done);
   }
 
