@@ -1431,6 +1431,11 @@ jint G1CollectedHeap::initialize() {
 
   _collection_set.initialize(max_reserved_regions());
 
+// mdf: initialize table address recorder
+	_tbl_before = new GrowableArray<uintptr_t>(500);
+	_tbl_after = new GrowableArray<uintptr_t>(500);
+	_objtbl = new objTable();
+
   allocation_failure_injector()->reset();
 
   CPUTimeCounters::create_counter(CPUTimeGroups::CPUTimeType::gc_parallel_workers);

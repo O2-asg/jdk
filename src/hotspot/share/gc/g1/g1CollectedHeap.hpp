@@ -562,6 +562,8 @@ public:
   void pin_object(JavaThread* thread, oop obj) override;
   void unpin_object(JavaThread* thread, oop obj) override;
 
+	void pin_region(JavaThread* thread, uintptr_t addr) override; // mdf
+
   void resize_heap_if_necessary();
 
   // Check if there is memory to uncommit and if so schedule a task to do it.

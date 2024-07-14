@@ -482,7 +482,7 @@ static void add_error_signals_to_set(sigset_t* set) {
   sigaddset(set, SIGILL);
   sigaddset(set, SIGBUS);
   sigaddset(set, SIGFPE);
-  sigaddset(set, SIGUSR1); // myl
+  sigaddset(set, SIGUSR1); // mdf
   sigaddset(set, SIGSEGV);
   sigaddset(set, SIGTRAP);
 }
@@ -491,7 +491,7 @@ static void remove_error_signals_from_set(sigset_t* set) {
   sigdelset(set, SIGILL);
   sigdelset(set, SIGBUS);
   sigdelset(set, SIGFPE);
-  sigdelset(set, SIGUSR1); // myl
+  sigdelset(set, SIGUSR1); // mdf
   sigdelset(set, SIGSEGV);
   sigdelset(set, SIGTRAP);
 }
@@ -924,7 +924,7 @@ void os::run_periodic_checks(outputStream* st) {
   print_handlers |= check_signal_handler(SIGSEGV);
   print_handlers |= check_signal_handler(SIGILL);
   print_handlers |= check_signal_handler(SIGFPE);
-  print_handlers |= check_signal_handler(SIGUSR1); // myl
+  print_handlers |= check_signal_handler(SIGUSR1); // mdf
   print_handlers |= check_signal_handler(SIGBUS);
   PPC64_ONLY(print_handlers |= check_signal_handler(SIGTRAP);)
 
@@ -1320,7 +1320,7 @@ static void install_signal_handlers() {
   set_signal_handler(SIGBUS);
   set_signal_handler(SIGILL);
   set_signal_handler(SIGFPE);
-  set_signal_handler(SIGUSR1); // myl
+  set_signal_handler(SIGUSR1); // mdf
   PPC64_ONLY(set_signal_handler(SIGTRAP);)
   set_signal_handler(SIGXFSZ);
   if (!ReduceSignalUsage) {
@@ -1483,7 +1483,7 @@ void os::print_signal_handlers(outputStream* st, char* buf, size_t buflen) {
   PosixSignals::print_signal_handler(st, SIGPIPE, buf, buflen);
   PosixSignals::print_signal_handler(st, SIGXFSZ, buf, buflen);
   PosixSignals::print_signal_handler(st, SIGILL , buf, buflen);
-  PosixSignals::print_signal_handler(st, SIGUSR1 , buf, buflen); // myl
+  PosixSignals::print_signal_handler(st, SIGUSR1 , buf, buflen); // mdf
   PosixSignals::print_signal_handler(st, PosixSignals::SR_signum, buf, buflen);
   PosixSignals::print_signal_handler(st, SHUTDOWN1_SIGNAL, buf, buflen);
   PosixSignals::print_signal_handler(st, SHUTDOWN2_SIGNAL , buf, buflen);
@@ -1532,7 +1532,7 @@ static void signal_sets_init() {
   sigaddset(&unblocked_sigs, SIGSEGV);
   sigaddset(&unblocked_sigs, SIGBUS);
   sigaddset(&unblocked_sigs, SIGFPE);
-  sigaddset(&unblocked_sigs, SIGUSR1); // myl
+  sigaddset(&unblocked_sigs, SIGUSR1); // mdf
   PPC64_ONLY(sigaddset(&unblocked_sigs, SIGTRAP);)
   sigaddset(&unblocked_sigs, PosixSignals::SR_signum);
 

@@ -1715,9 +1715,9 @@ JNI_ENTRY(void, jni_CallStaticVoidMethod(JNIEnv *env, jclass cls, jmethodID meth
   JavaValue jvalue(T_VOID);
   JNI_ArgumentPusherVaArg ap(methodID, args);
 
-	// myl
+	// mdf: enable mainthread flag
 	if (thread != nullptr && thread->is_Java_thread()) {
-		thread->set_is_in_mainthread(true);
+//		thread->set_is_in_mainthread(true);
 	}
 
   jni_invoke_static(env, &jvalue, nullptr, JNI_STATIC, methodID, &ap, CHECK);
@@ -3915,7 +3915,7 @@ jint JNICALL jni_DetachCurrentThread(JavaVM *vm)  {
     return JNI_ERR;
   }
 
-	// myl
+	// mdf: disable mainthread flag
 	thread->set_is_in_mainthread(false);
 
   // We are going to VM, change W^X state to the expected one.

@@ -170,7 +170,8 @@ void TemplateInterpreterGenerator::generate_all() {
     Interpreter::_throw_ArrayIndexOutOfBoundsException_entry = generate_ArrayIndexOutOfBounds_handler();
     Interpreter::_throw_ArrayStoreException_entry            = generate_klass_exception_handler("java/lang/ArrayStoreException");
     Interpreter::_throw_ArithmeticException_entry            = generate_exception_handler("java/lang/ArithmeticException", "/ by zero");
-    Interpreter::_throw_ECCuncorrectableMemoryException_entry = generate_ECCuncorrectableMemoryException_handler();
+    Interpreter::_throw_ECCuncorrectableMemoryException_entry = generate_ECCuncorrectableMemoryException_handler(); //mdf
+//    Interpreter::_throw_ECCuncorrectableMemoryException_entry = generate_exception_handler("java/lang/ECCuncorrectableMemoryException", "broken memory");
     Interpreter::_throw_ClassCastException_entry             = generate_ClassCastException_handler();
     Interpreter::_throw_NullPointerException_entry           = generate_exception_handler("java/lang/NullPointerException", nullptr);
     Interpreter::_throw_StackOverflowError_entry             = generate_StackOverflowError_handler();

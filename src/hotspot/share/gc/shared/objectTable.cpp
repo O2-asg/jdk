@@ -1,44 +1,63 @@
 #include "objectTable.hpp"
+#include "oops/oop.hpp" // to use identity_hash()
+#include "oops/oop.inline.hpp" // to use identity_hash()
+#include "runtime/jniHandles.hpp"
+#include "runtime/jniHandles.inline.hpp"
 #include "precompiled.hpp"
 
 void objTable::clearobjTable(void)
 {
-	int i;
-	objNode *n, *target;
+	objNode *n;
+	oop o;
 
-	for (i = 0; i < BUCKET_SIZE; i++) {
-		n = bucket[i];
-		while (n != nullptr) {
-			target = n;
-			n = n->next;
-			delete target;
-		}
+	n = this->head;
+	while (n->next != nullptr) {
+		o = JNIHandles::resolve(n->next->obj);
+		if (o != nullptr) JNIHandles::destroy_weak_global(n->next->obj);
+		n = n->next;
+	}
+	this->head = nullptr;
+}
+
+// only deallocate jni weak Handle (if any)
+void objTable::deleteobjNode_internal(objNode* target)
+{
+	oop o = JNIHandles::resolve(target->obj);
+
+	if (o != nullptr) { // object is still live
+		target->obj = nullptr;
+		return; // keep tracking
+	} else { // object has been dead
+		JNIHandles::destroy_weak_global(target->obj);
+		target->obj = nullptr;
+//		delete target; // this code is problematic
 	}
 }
 
-void objTable::addobjNode(size_t size, uintptr_t addr, intptr_t hash)
+void objTable::addobjNode(Thread* thread, oop obj)
 {
-	int hash_value = addr % BUCKET_SIZE;
+	jweak weak_obj = JNIHandles::make_weak_global(Handle(thread, obj));
+	objNode *newobj = new objNode(obj->size(), weak_obj, obj->identity_hash());
 
-	objNode *newobj = new objNode(size, addr, hash);
-
-	newobj->next = this->bucket[hash_value];
-	this->bucket[hash_value] = newobj;
+	newobj->next = this->head->next;
+	this->head->next = newobj;
 }
 
 void objTable::deleteobjNode(uintptr_t addr)
 {
-	int hash_value = addr % BUCKET_SIZE;
-
-	objNode *n = this->bucket[hash_value];
+	objNode *n = this->head;
 	objNode *target = nullptr;
 
-	if (n->addr == addr) {
+/*	if (n->addr == addr) {
 		this->bucket[hash_value] = n->next;
 		return;
-	}
+	}*/
+/*	if ((uintptr_t)n->h() == addr) {
+		this->head = n->next;
+		return;
+	}*/
 
-	while (n != nullptr) {
+/*	while (n != nullptr) {
 		if (n->next->addr == addr) {
 			target = n->next;
 			n->next = target->next;
@@ -46,42 +65,53 @@ void objTable::deleteobjNode(uintptr_t addr)
 			return;
 		}
 		n = n->next;
-	}
+	}*/
 }
 
-oop objTable::getOopFromAddr(uintptr_t addr)
+intptr_t objTable::getHashFromAddr(uintptr_t addr)
 {
 	int i;
 	uintptr_t start, end;
-	objNode *o;
+	oop tmp;
+	objNode *n;
 
-	for (i = 0; i < BUCKET_SIZE; i++) {
-		o = this->bucket[i];
-		while (o != nullptr) {
-			start = o->addr;
-			end = start + (o->size << LogHeapWordSize);
+	n = this->head;
+	while (n->next != nullptr) {
+		tmp = JNIHandles::resolve(n->next->obj);
+		if (tmp != nullptr) {
+			start = (uintptr_t)p2i(tmp);
+			end = start + (n->next->size << LogHeapWordSize);
 			if ((start <= addr) && (addr < end)) {
-				return cast_to_oop(o->addr);
+				return n->next->hash;
 			}
-			o = o->next;
+		} else { // object has been collected
+			deleteobjNode_internal(n->next);
+			n->next = n->next->next;
+			continue;
 		}
+		n = n->next;
 	}
 
-	return nullptr;
+	return 0;
 }
 
 void objTable::showobjTable(void)
 {
-	objNode *n;
+	objNode *n = this->head;
+	oop o;
 	FILE *fp = os::fopen("/home/vmuser/jdk/mylogfile.log", "a");
 
-	for (int i = 0; i < BUCKET_SIZE; i++) {
-		n = this->bucket[i];
-		while (n != nullptr) {
-			fprintf(fp, "showobjTable: object hashCode is %lx, addr is %lx, size is %ld\n", \
-				n->hash, n->addr, n->size);
-			n = n->next;
+	while (n->next != nullptr) {
+		o = JNIHandles::resolve(n->next->obj);
+		if (o != nullptr) {
+			fprintf(fp, "showobjTable: hash is %lx, addr is %lx, size is %ld\n",
+				n->next->hash, p2i(o), n->next->size);
+		} else { // original object has been deleted (collected)
+			deleteobjNode_internal(n->next);
+			n->next = n->next->next;
+			continue;
 		}
+		n = n->next;
 	}
 
 	fclose(fp);

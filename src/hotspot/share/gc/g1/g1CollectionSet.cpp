@@ -290,8 +290,34 @@ double G1CollectionSet::finalize_young_part(double target_pause_time_ms, G1Survi
   // pause are appended to the RHS of the young list, i.e.
   //   [Newly Young Regions ++ Survivors from last pause].
 
+// mdf: exclude pinned region from CSet
   uint eden_region_length = _g1h->eden_regions_count();
   uint survivor_region_length = survivors->length();
+	uint young_length = cur_length();
+	uint eden_actual_len, surv_actual_len, i;
+	clear(); // set _collection_set_cur_length to 0
+	HeapRegion* r;
+
+	// iterate over all young regions
+	for (eden_actual_len = 0, surv_actual_len = 0, i = 0; i < young_length; i++) {
+		r = _g1h->region_at(_collection_set_regions[i]);
+		if (!r->has_pinned_objects()) {
+			r->set_young_index_in_cset(_collection_set_cur_length + 1);
+			_collection_set_regions[_collection_set_cur_length++] = r->hrm_index();
+			if (r->is_eden()) {
+				eden_actual_len++;
+			} else if (r->is_survivor()) {
+				surv_actual_len++;
+			}
+		} else { // region is pinned
+			_g1h->clear_region_attr(r);
+			r->clear_young_index_in_cset();
+		}
+	}
+
+	eden_region_length = eden_actual_len;
+	survivor_region_length = surv_actual_len;
+
   init_region_lengths(eden_region_length, survivor_region_length);
 
   verify_young_cset_indices();

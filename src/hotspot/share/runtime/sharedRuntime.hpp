@@ -187,7 +187,7 @@ class SharedRuntime: AllStatic {
     IMPLICIT_NULL,
     IMPLICIT_DIVIDE_BY_ZERO,
     STACK_OVERFLOW,
-    EME // myl
+    EME // mdf
   };
   static void    throw_AbstractMethodError(JavaThread* current);
   static void    throw_IncompatibleClassChangeError(JavaThread* current);
@@ -578,7 +578,7 @@ class SharedRuntime: AllStatic {
 
   static void print_statistics() PRODUCT_RETURN;
 
-  static int register_TLAB_object(oopDesc* o); // myl
+  static int register_TLAB_object(oopDesc* o); // mdf
 };
 
 

@@ -203,6 +203,28 @@ enum {
   trap_page_fault = 0xE
 };
 
+// mdf: function procfs_addr()
+uintptr_t procfs_addr(void)
+{
+	int pid = os::current_process_id();
+	char procfs_name[50], procfs_content[50];
+	uintptr_t addr;
+
+	os::snprintf(procfs_name, 50, "/proc/%d_addresses", pid); // get file name
+
+	FILE *fp = fopen(procfs_name, "r");
+	if (fp == NULL) return 0;
+
+	if (fscanf(fp, "%s", procfs_content) < 0) {
+		return 0;
+	}
+	fclose(fp);
+
+	addr = (uintptr_t)strtol(procfs_content, NULL, 16);
+
+	return addr;
+}
+
 bool PosixSignals::pd_hotspot_signal_handler(int sig, siginfo_t* info,
                                              ucontext_t* uc, JavaThread* thread) {
 
@@ -311,7 +333,11 @@ bool PosixSignals::pd_hotspot_signal_handler(int sig, siginfo_t* info,
                  MacroAssembler::uses_implicit_null_check(info->si_addr)) {
           // Determination of interpreter/vtable stub/compiled code null exception
           stub = SharedRuntime::continuation_for_implicit_exception(thread, pc, SharedRuntime::IMPLICIT_NULL);
-      } else if (sig == SIGUSR1) { // EME signal myl
+      } else if (sig == SIGUSR1) { // mdf: EME signal
+      	uintptr_t err_addr = procfs_addr();
+	if (err_addr != 0) {
+      		Universe::heap()->pin_region(thread, err_addr);
+      	}
         stub = SharedRuntime::continuation_for_implicit_exception(thread, pc, SharedRuntime::EME);
       }
     } else if ((thread->thread_state() == _thread_in_vm ||

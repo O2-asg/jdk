@@ -128,7 +128,7 @@ OopHandle Universe::_msg_class_metaspace;
 
 OopHandle Universe::_null_ptr_exception_instance;
 OopHandle Universe::_arithmetic_exception_instance;
-OopHandle Universe::_eme_exception_instance; // myl
+OopHandle Universe::_eme_exception_instance; // mdf
 OopHandle Universe::_virtual_machine_error_instance;
 
 OopHandle Universe::_reference_pending_list;
@@ -184,7 +184,7 @@ oop Universe::the_min_jint_string()               { return _the_min_jint_string.
 
 oop Universe::null_ptr_exception_instance()       { return _null_ptr_exception_instance.resolve(); }
 oop Universe::arithmetic_exception_instance()     { return _arithmetic_exception_instance.resolve(); }
-oop Universe::eme_exception_instance()			{ return _eme_exception_instance.resolve(); } // myl
+oop Universe::eme_exception_instance()			{ return _eme_exception_instance.resolve(); } // mdf
 oop Universe::virtual_machine_error_instance()    { return _virtual_machine_error_instance.resolve(); }
 
 oop Universe::the_null_sentinel()                 { return _the_null_sentinel.resolve(); }
@@ -1024,7 +1024,7 @@ bool universe_post_init() {
   instance = InstanceKlass::cast(k)->allocate_instance(CHECK_false);
   Universe::_arithmetic_exception_instance = OopHandle(Universe::vm_global(), instance);
 
-// myl
+// mdf: initialize EME klass
   k = SystemDictionary::resolve_or_fail(vmSymbols::java_lang_ECCuncorrectableMemoryException(), true, CHECK_false);
   instance = InstanceKlass::cast(k)->allocate_instance(CHECK_false);
   Universe::_eme_exception_instance = OopHandle(Universe::vm_global(), instance);

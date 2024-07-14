@@ -165,9 +165,9 @@ oop ObjArrayKlass::multi_allocate(int rank, jint* sizes, TRAPS) {
       for (int index = 0; index < length; index++) {
         oop sub_array = ld_klass->multi_allocate(rank - 1, &sizes[1], CHECK_NULL);
 
-	// myl
+	// mdf
 	if (THREAD->is_in_mainthread()) {
-		THREAD->objtbl()->addobjNode(sub_array->size(), (uintptr_t)sub_array, sub_array->identity_hash());
+//		Universe::heap()->objtbl()->addobjNode(sub_array->size(), (uintptr_t)sub_array, sub_array->identity_hash());
 	}
 
         h_array->obj_at_put(index, sub_array);

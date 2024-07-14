@@ -105,7 +105,7 @@ class TemplateInterpreter: public AbstractInterpreter {
   static address    _throw_ArrayIndexOutOfBoundsException_entry;
   static address    _throw_ArrayStoreException_entry;
   static address    _throw_ArithmeticException_entry;
-	static address _throw_ECCuncorrectableMemoryException_entry; // myl
+	static address _throw_ECCuncorrectableMemoryException_entry; // mdf
   static address    _throw_ClassCastException_entry;
   static address    _throw_NullPointerException_entry;
   static address    _throw_exception_entry;
@@ -152,7 +152,7 @@ class TemplateInterpreter: public AbstractInterpreter {
   static address    remove_activation_entry()                   { return _remove_activation_entry; }
   static address    throw_exception_entry()                     { return _throw_exception_entry; }
   static address    throw_ArithmeticException_entry()           { return _throw_ArithmeticException_entry; }
-	static address throw_ECCuncorrectableMemoryException_entry() { return _throw_ECCuncorrectableMemoryException_entry; } // myl
+	static address throw_ECCuncorrectableMemoryException_entry() { return _throw_ECCuncorrectableMemoryException_entry; } // mdf
   static address    throw_NullPointerException_entry()          { return _throw_NullPointerException_entry; }
   static address    throw_StackOverflowError_entry()            { return _throw_StackOverflowError_entry; }
 

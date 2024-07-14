@@ -29,7 +29,6 @@
 #include "jni.h"
 #include "gc/shared/gcThreadLocalData.hpp"
 #include "gc/shared/threadLocalAllocBuffer.hpp"
-#include "gc/shared/objectTable.hpp" // myl
 #include "memory/allocation.hpp"
 #include "runtime/atomic.hpp"
 #include "runtime/globals.hpp"
@@ -651,12 +650,10 @@ protected:
     return cur != nullptr && cur->in_asgct();
   }
 
-// myl
+// mdf
 	bool _is_in_mainthread = false;
-	objTable* _objtbl;
-	public:
+ public:
 	bool is_in_mainthread() const { return _is_in_mainthread; }
-	objTable* objtbl() { return _objtbl; }
 	void set_is_in_mainthread(bool value) { _is_in_mainthread = value; }
 
  private:

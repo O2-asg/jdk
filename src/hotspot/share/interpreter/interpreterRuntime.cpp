@@ -239,9 +239,14 @@ JRT_ENTRY(void, InterpreterRuntime::_new(JavaThread* current, ConstantPool* pool
   //       because the _breakpoint bytecode would be lost.
   oop obj = klass->allocate_instance(CHECK);
 
-	// myl
+	// mdf
 	if (current->is_in_mainthread()) {
-		current->objtbl()->addobjNode(obj->size(), (uintptr_t)obj, obj->identity_hash());
+		if (Universe::heap()->kind() == CollectedHeap::G1)
+			Universe::heap()->objtbl()->addobjNode(current, obj);
+/*		FILE *fp = fopen("/home/vmuser/jdk/mylogfile.log", "a");
+		fprintf(fp, "IRT::_new: addr is %lx, hash is %lx\n",
+			p2i(obj), obj->identity_hash());
+		fclose(fp);*/
 	}
 
   current->set_vm_result(obj);
@@ -251,9 +256,10 @@ JRT_END
 JRT_ENTRY(void, InterpreterRuntime::newarray(JavaThread* current, BasicType type, jint size))
   oop obj = oopFactory::new_typeArray(type, size, CHECK);
 
-	// myl
+	// mdf
 	if (current->is_in_mainthread()) {
-		current->objtbl()->addobjNode(obj->size(), (uintptr_t)obj, obj->identity_hash());
+		if (Universe::heap()->kind() == CollectedHeap::G1)
+			Universe::heap()->objtbl()->addobjNode(current, obj);
 	}
 
   current->set_vm_result(obj);
@@ -264,9 +270,10 @@ JRT_ENTRY(void, InterpreterRuntime::anewarray(JavaThread* current, ConstantPool*
   Klass*    klass = pool->klass_at(index, CHECK);
   objArrayOop obj = oopFactory::new_objArray(klass, size, CHECK);
 
-	// myl
+	// mdf
 	if (current->is_in_mainthread()) {
-		current->objtbl()->addobjNode(obj->size(), (uintptr_t)obj, obj->identity_hash());
+		if (Universe::heap()->kind() == CollectedHeap::G1)
+			Universe::heap()->objtbl()->addobjNode(current, obj);
 	}
 
   current->set_vm_result(obj);
@@ -298,9 +305,10 @@ JRT_ENTRY(void, InterpreterRuntime::multianewarray(JavaThread* current, jint* fi
   }
   oop obj = ArrayKlass::cast(klass)->multi_allocate(nof_dims, dims, CHECK);
 
-	// myl
+	// mdf
 	if (current->is_in_mainthread()) {
-		current->objtbl()->addobjNode(obj->size(), (uintptr_t)obj, obj->identity_hash());
+		if (Universe::heap()->kind() == CollectedHeap::G1)
+			Universe::heap()->objtbl()->addobjNode(current, obj);
 	}
 
   current->set_vm_result(obj);
@@ -680,10 +688,8 @@ JRT_ENTRY(void, InterpreterRuntime::throw_NullPointerException(JavaThread* curre
   THROW(vmSymbols::java_lang_NullPointerException());
 JRT_END
 
-// myl
+// mdf
 JRT_ENTRY(void, InterpreterRuntime::throw_ECCuncorrectableMemoryException(JavaThread* current))
-	ResourceMark rm(current);
-
 	THROW(vmSymbols::java_lang_ECCuncorrectableMemoryException());
 JRT_END
 

@@ -824,7 +824,10 @@ public:
     }
     if (region_attr.is_in_cset()) {
       assert(obj->is_forwarded(), "invariant" );
+// mdf: table address overwrite
+//Universe::heap()->tbl_before()->append((uintptr_t)*p); // should be on with runtime
       *p = obj->forwardee();
+//Universe::heap()->tbl_after()->append((uintptr_t)*p); // should be on with runtime
     } else {
       assert(!obj->is_forwarded(), "invariant" );
       assert(region_attr.is_humongous_candidate(),
@@ -996,7 +999,15 @@ void G1YoungCollector::post_evacuate_collection_set(G1EvacInfo* evacuation_info,
   G1STWIsAliveClosure is_alive(_g1h);
   G1KeepAliveClosure keep_alive(_g1h);
 
+FILE *fp = fopen("/home/vmuser/jdk/mylogfile.log", "a");
+fprintf(fp, "calling weak_oops_do()\n");
+fclose(fp);
+
   WeakProcessor::weak_oops_do(workers(), &is_alive, &keep_alive, p->weak_phase_times());
+
+// mdf: table address record reset
+Universe::heap()->tbl_before()->clear_and_deallocate();
+Universe::heap()->tbl_after()->clear_and_deallocate();
 
   allocator()->release_gc_alloc_regions(evacuation_info);
 

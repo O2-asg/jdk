@@ -41,6 +41,8 @@
 #include "utilities/formatBuffer.hpp"
 #include "utilities/growableArray.hpp"
 
+#include "gc/shared/objectTable.hpp" // mdf
+
 // A "CollectedHeap" is an implementation of a java heap for HotSpot.  This
 // is an abstract class: there may be many different kinds of heaps.  This
 // class defines the functions that a heap must implement, and contains
@@ -59,6 +61,8 @@ class ThreadClosure;
 class VirtualSpaceSummary;
 class WorkerThreads;
 class nmethod;
+
+class objTable; // mdf
 
 class ParallelObjectIteratorImpl : public CHeapObj<mtGC> {
 public:
@@ -138,6 +142,11 @@ class CollectedHeap : public CHeapObj<mtGC> {
   GCCause::Cause _gc_lastcause;
   PerfStringVariable* _perf_gc_cause;
   PerfStringVariable* _perf_gc_lastcause;
+
+// mdf
+GrowableArray<uintptr_t>* _tbl_before;
+GrowableArray<uintptr_t>* _tbl_after;
+objTable* _objtbl;
 
   // Constructor
   CollectedHeap();
@@ -511,6 +520,11 @@ protected:
   // These functions are potentially safepointing.
   virtual void pin_object(JavaThread* thread, oop obj) = 0;
   virtual void unpin_object(JavaThread* thread, oop obj) = 0;
+
+virtual void pin_region(JavaThread* thread, uintptr_t addr) { } // mdf
+GrowableArray<uintptr_t>* tbl_before() { return _tbl_before; }
+GrowableArray<uintptr_t>* tbl_after() { return _tbl_after; }
+objTable* objtbl() { return _objtbl; }
 
   // Support for loading objects from CDS archive into the heap
   // (usually as a snapshot of the old generation).
