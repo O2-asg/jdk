@@ -1,13 +1,22 @@
+import epackage.EList;
+
 class TekitouTest {
 	public static void main(String[] args)
 	{
-		int len = 1000000;
+		EList lst = new EList(1, null);
 		Object objs[];
 
-		objs = new Object[len];
+		lst.addNode(2, null);
+		lst.addNode(3, null);
 
-		for (int i = 0; i < len; i++) {
-			objs[i] = new Object();
+		try {
+			System.gc();
+		} catch (ECCuncorrectableMemoryException e) {
+			int hash = e.getBrokenObjectHash();
+			System.out.printf("hash is %x\n", hash);
+			lst.delNode(2);
+			System.gc();
+			System.out.println("after reconstruction & another GC");
 		}
 	}
 }

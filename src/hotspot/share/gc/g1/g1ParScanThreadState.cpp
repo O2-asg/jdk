@@ -217,6 +217,13 @@ void G1ParScanThreadState::do_oop_evac(T* p) {
     obj = do_copy_to_survivor_space(region_attr, obj, m);
   }
   RawAccess<IS_NOT_NULL>::oop_store(p, obj);
+// mdf: fault injection
+if (MyDebugFlag) {
+	while (1){
+		if (Universe::heap()->get_emes_during_gc()) break;
+		os::naked_short_sleep(999);
+	}
+}
 
   write_ref_field_post(p, obj);
 }

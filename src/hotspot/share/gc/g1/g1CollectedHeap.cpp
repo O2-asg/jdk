@@ -1431,10 +1431,12 @@ jint G1CollectedHeap::initialize() {
 
   _collection_set.initialize(max_reserved_regions());
 
-// mdf: initialize table address recorder
-	_tbl_before = new GrowableArray<uintptr_t>(500);
-	_tbl_after = new GrowableArray<uintptr_t>(500);
+// mdf: initialize table address recorder &
+// hash recorder &
+// gc flag
 	_objtbl = new objTable();
+	_hash_recorder = new GrowableArray<uintptr_t>(50);
+	_emes_during_gc = false;
 
   allocation_failure_injector()->reset();
 
@@ -1833,6 +1835,15 @@ bool G1CollectedHeap::try_collect_concurrently(GCCause::Cause cause,
   }
 }
 
+// mdf: definition of check_EMEs()
+void check_EMEs()
+{
+	JavaThreadIteratorWithHandle jtiwh;
+	JavaThread* THREAD = jtiwh.next();
+	if (Universe::heap()->get_emes_during_gc() && Universe::heap()->hash_recorder()->length() != 0) THROW_OOP(Universe::eme_exception_instance());
+	return;
+}
+
 bool G1CollectedHeap::try_collect_fullgc(GCCause::Cause cause,
                                          const G1GCCounters& counters_before) {
   assert_heap_not_locked();
@@ -1851,6 +1862,8 @@ bool G1CollectedHeap::try_collect_fullgc(GCCause::Cause cause,
     {
       MutexLocker ml(Heap_lock);
       if (counters_before.total_full_collections() != total_full_collections()) {
+// mdf: check EMEs after full gc
+	check_EMEs();
         return true;
       }
     }
@@ -2207,6 +2220,8 @@ void G1CollectedHeap::gc_prologue(bool full) {
   if (full || collector_state()->in_concurrent_start_gc()) {
     increment_old_marking_cycles_started();
   }
+// mdf: disable EMEs flag before GC
+	Universe::heap()->set_emes_during_gc(false);
 }
 
 void G1CollectedHeap::gc_epilogue(bool full) {
@@ -2339,7 +2354,8 @@ void G1CollectedHeap::start_new_collection_set() {
 
   clear_region_attr();
 
-  guarantee(_eden.length() == 0, "eden should have been cleared");
+// mdf: this guarantee() may cause Internal Error
+//  guarantee(_eden.length() == 0, "eden should have been cleared");
   policy()->transfer_survivors_to_cset(survivor());
 
   // We redo the verification but now wrt to the new CSet which

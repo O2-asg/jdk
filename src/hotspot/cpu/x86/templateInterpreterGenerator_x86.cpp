@@ -149,7 +149,7 @@ address TemplateInterpreterGenerator::generate_ClassCastException_handler() {
   return entry;
 }
 
-// mdf: function generate_EME_handler()
+// mdf: definition of generate_EME_handler()
 address TemplateInterpreterGenerator::generate_ECCuncorrectableMemoryException_handler() {
 	address entry = __ pc();
 

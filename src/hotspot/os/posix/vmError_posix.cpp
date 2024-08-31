@@ -96,8 +96,9 @@ static void crash_handler(int sig, siginfo_t* info, void* context) {
 const void* VMError::crash_handler_address = CAST_FROM_FN_PTR(void *, crash_handler);
 
 void VMError::install_secondary_signal_handler() {
+// mdf: add SIGUSR1 as signals_to_handle
   static const int signals_to_handle[] = {
-    SIGSEGV, SIGBUS, SIGILL, SIGFPE, SIGTRAP, SIGUSR1, // mdf
+    SIGSEGV, SIGBUS, SIGILL, SIGFPE, SIGTRAP, SIGUSR1,
     0 // end
   };
   for (int i = 0; signals_to_handle[i] != 0; i++) {

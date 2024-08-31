@@ -128,7 +128,8 @@ OopHandle Universe::_msg_class_metaspace;
 
 OopHandle Universe::_null_ptr_exception_instance;
 OopHandle Universe::_arithmetic_exception_instance;
-OopHandle Universe::_eme_exception_instance; // mdf
+// mdf: declaration of _eme_exception_instance
+OopHandle Universe::_eme_exception_instance;
 OopHandle Universe::_virtual_machine_error_instance;
 
 OopHandle Universe::_reference_pending_list;
@@ -184,7 +185,8 @@ oop Universe::the_min_jint_string()               { return _the_min_jint_string.
 
 oop Universe::null_ptr_exception_instance()       { return _null_ptr_exception_instance.resolve(); }
 oop Universe::arithmetic_exception_instance()     { return _arithmetic_exception_instance.resolve(); }
-oop Universe::eme_exception_instance()			{ return _eme_exception_instance.resolve(); } // mdf
+// mdf: definition of eme_exception_instance()
+oop Universe::eme_exception_instance()			{ return _eme_exception_instance.resolve(); }
 oop Universe::virtual_machine_error_instance()    { return _virtual_machine_error_instance.resolve(); }
 
 oop Universe::the_null_sentinel()                 { return _the_null_sentinel.resolve(); }

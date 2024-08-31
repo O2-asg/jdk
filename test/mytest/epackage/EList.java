@@ -153,6 +153,8 @@ public class EList {
 			newnode.next = oldhead; // set next to old head
 			this.head = newnode; // set head to newnode
 
+			System.out.println(newnode);
+
 			// record newly allocated ListNode
 			add_rec(newnode, oldhead);
 		}

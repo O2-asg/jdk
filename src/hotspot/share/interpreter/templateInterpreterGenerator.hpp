@@ -57,7 +57,8 @@ class TemplateInterpreterGenerator: public AbstractInterpreterGenerator {
   address generate_deopt_entry_for(TosState state, int step, address continuation = nullptr);
   address generate_safept_entry_for(TosState state, address runtime_entry);
   void    generate_throw_exception();
-	address generate_ECCuncorrectableMemoryException_handler(); // mdf
+// mdf: declaration of generate_EME_handler()
+	address generate_ECCuncorrectableMemoryException_handler();
 
   void lock_method();
 

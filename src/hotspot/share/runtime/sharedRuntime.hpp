@@ -183,11 +183,12 @@ class SharedRuntime: AllStatic {
   // exception handling and implicit exceptions
   static address compute_compiled_exc_handler(CompiledMethod* nm, address ret_pc, Handle& exception,
                                               bool force_unwind, bool top_frame_only, bool& recursive_exception_occurred);
+// mdf: add EME Exception Kind
   enum ImplicitExceptionKind {
     IMPLICIT_NULL,
     IMPLICIT_DIVIDE_BY_ZERO,
     STACK_OVERFLOW,
-    EME // mdf
+    EME
   };
   static void    throw_AbstractMethodError(JavaThread* current);
   static void    throw_IncompatibleClassChangeError(JavaThread* current);
@@ -578,7 +579,11 @@ class SharedRuntime: AllStatic {
 
   static void print_statistics() PRODUCT_RETURN;
 
-  static int register_TLAB_object(oopDesc* o); // mdf
+// mdf: declaration of register_TLAB_object()
+  static int register_TLAB_object(oopDesc* o);
+
+// mdf: declaration of procfs_addr()
+  static uintptr_t procfs_addr();
 };
 
 

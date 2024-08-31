@@ -529,38 +529,14 @@ JVM_ENTRY(jstring, JVM_GetExtendedNPEMessage(JNIEnv *env, jthrowable throwable))
   }
 JVM_END
 
-// mdf: JNI function
+// mdf: definition of getHash() JNI function
 JVM_ENTRY(jint, JVM_GetBrokenObjectHash(JNIEnv *env, jthrowable throwable))
-	int pid = os::current_process_id();
-	char procfs_name[50], procfs_content[50];
-	uintptr_t addr;
-	intptr_t hash;
-
-//	os::snprintf(procfs_name, 50, "/proc/%d_addresses", pid); // get file name
-	os::snprintf(procfs_name, 50, "/home/vmuser/jdk/address_file"); // for region pinning check
-
-	FILE *fp = fopen(procfs_name, "r");
-	if (fp == NULL) return -1;
-
-	if (fscanf(fp, "%s", procfs_content) < 0) {
-		return -1;
-	}
-	fclose(fp);
-
-	addr = (uintptr_t)strtol(procfs_content, NULL, 16);
-
-	hash = Universe::heap()->objtbl()->getHashFromAddr(addr);
-
-/*	if (hash > 0) {
-		return hash;
+	// get hashCode
+	if (Universe::heap()->hash_recorder()->is_nonempty()) {
+		return Universe::heap()->hash_recorder()->pop();
 	} else {
 		return -1;
-	}*/
-	if (strcmp(Universe::heap()->name(), "G1") == 0) { // region pinning check
-		Universe::heap()->pin_region(THREAD, addr);
-		return 0;
 	}
-	return -1;
 JVM_END
 
 

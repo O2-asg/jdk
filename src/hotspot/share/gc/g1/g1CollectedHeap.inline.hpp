@@ -280,7 +280,7 @@ inline void G1CollectedHeap::unpin_object(JavaThread* thread, oop obj) {
   G1ThreadLocalData::pin_count_cache(thread).dec_count(obj_region_idx);
 }
 
-// mdf
+// mdf: definition of pin_region()
 inline void G1CollectedHeap::pin_region(JavaThread* thread, uintptr_t addr) {
 	uint addr_region_idx = heap_region_containing((void*)addr)->hrm_index();
 	G1ThreadLocalData::pin_count_cache(thread).inc_count(addr_region_idx);

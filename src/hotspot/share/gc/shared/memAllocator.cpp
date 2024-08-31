@@ -55,6 +55,8 @@ class MemAllocator::Allocation: StackObj {
   bool                _tlab_end_reset_for_sample;
 
   bool check_out_of_memory();
+// mdf: declaration of check_EMEs()
+  void check_EMEs();
   void verify_before();
   void verify_after();
   void notify_allocation();
@@ -86,6 +88,10 @@ public:
     if (!check_out_of_memory()) {
       notify_allocation();
     }
+// mdf: check EMEs after allocation
+	if (MyDebugFlag) {
+		check_EMEs();
+	}
   }
 
   oop obj() const { return *_obj_ptr; }
@@ -139,6 +145,13 @@ bool MemAllocator::Allocation::check_out_of_memory() {
   } else {
     THROW_OOP_(Universe::out_of_memory_error_retry(), true);
   }
+}
+
+// mdf: definition of check_EMEs()
+void MemAllocator::Allocation::check_EMEs()
+{
+	JavaThread* THREAD = _thread;
+	if (Universe::heap()->get_emes_during_gc() && Universe::heap()->hash_recorder()->length() != 0) THROW_OOP(Universe::eme_exception_instance());
 }
 
 void MemAllocator::Allocation::verify_before() {

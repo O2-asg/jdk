@@ -125,9 +125,6 @@ void WeakProcessorTimes::record_worker_items(uint worker_id,
   WorkerDataArray<double>* data = worker_data(id);
   data->set_or_add_thread_work_item(worker_id, num_dead, DeadItems);
   data->set_or_add_thread_work_item(worker_id, num_total, TotalItems);
-FILE *fp = fopen("/home/vmuser/jdk/mylogfile.log", "a");
-fprintf(fp, "worker ID %d: num_dead = %ld, num_total = %ld\n", worker_id, num_dead, num_total);
-fclose(fp);
 }
 
 static double elapsed_time_sec(Ticks start_time, Ticks end_time) {

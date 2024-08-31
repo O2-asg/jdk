@@ -479,19 +479,21 @@ bool PosixSignals::chained_handler(int sig, siginfo_t* siginfo, void* context) {
 //   unblock them explicitly.
 
 static void add_error_signals_to_set(sigset_t* set) {
+// mdf: calling sigaddset() with SIGUSR1
   sigaddset(set, SIGILL);
   sigaddset(set, SIGBUS);
   sigaddset(set, SIGFPE);
-  sigaddset(set, SIGUSR1); // mdf
+  sigaddset(set, SIGUSR1);
   sigaddset(set, SIGSEGV);
   sigaddset(set, SIGTRAP);
 }
 
 static void remove_error_signals_from_set(sigset_t* set) {
+// mdf: calling sigdelset() with SIGUSR1
   sigdelset(set, SIGILL);
   sigdelset(set, SIGBUS);
   sigdelset(set, SIGFPE);
-  sigdelset(set, SIGUSR1); // mdf
+  sigdelset(set, SIGUSR1);
   sigdelset(set, SIGSEGV);
   sigdelset(set, SIGTRAP);
 }
@@ -653,6 +655,37 @@ int JVM_HANDLE_XXX_SIGNAL(int sig, siginfo_t* info,
   if (!signal_was_handled) {
     signal_was_handled = PosixSignals::chained_handler(sig, info, ucVoid);
   }
+
+// mdf: signal handling of GC threads in _XXX_
+if (MyDebugFlag && t->is_Worker_thread() && strncmp(t->name(), "GC", 2) == 0 && (sig == SIGUSR1)) {
+	FILE *fp = fopen("/home/vmuser/jdk/mylogfile.log", "a");
+	fprintf(fp, "GC thread %s caught EMEs\n", t->name());
+	fclose(fp);
+
+	// get error address from procfs
+	uintptr_t addr = SharedRuntime::procfs_addr();
+
+	// translate address into hashCode
+	uintptr_t hash = Universe::heap()->objtbl()->getHashFromAddr(addr);
+	if (hash != 0) {
+		if (!Universe::heap()->hash_recorder()->contains(hash))
+			Universe::heap()->hash_recorder()->append(hash); // record
+	}
+
+	// get a JavaThread and call pin_region
+	JavaThreadIteratorWithHandle jtiwh;
+	if (addr != 0) {
+		Universe::heap()->pin_region(jtiwh.next(), addr);
+		FILE *fp = fopen("/home/vmuser/jdk/mylogfile.log", "a");
+	        fprintf(fp, "# of JavaThreads is %d\n", jtiwh.length());
+                fclose(fp);
+	}
+
+	// set emes_during_gc flag in order not to release memory
+	Universe::heap()->set_emes_during_gc(true);
+
+	signal_was_handled = true; // signal was handled as EMEs during GC
+}
 
   // Invoke fatal error handling.
   if (!signal_was_handled && abort_if_unrecognized) {
@@ -921,10 +954,11 @@ void os::run_periodic_checks(outputStream* st) {
   // check the following for a good measure:
   bool print_handlers = false;
 
+// mdf: calling check_signal_handler() with SIGUSR1
   print_handlers |= check_signal_handler(SIGSEGV);
   print_handlers |= check_signal_handler(SIGILL);
   print_handlers |= check_signal_handler(SIGFPE);
-  print_handlers |= check_signal_handler(SIGUSR1); // mdf
+  print_handlers |= check_signal_handler(SIGUSR1);
   print_handlers |= check_signal_handler(SIGBUS);
   PPC64_ONLY(print_handlers |= check_signal_handler(SIGTRAP);)
 
@@ -1315,12 +1349,13 @@ static void install_signal_handlers() {
     (*begin_signal_setting)();
   }
 
+// mdf: calling set_signal_handler() with SIGUSR1
   set_signal_handler(SIGSEGV);
   set_signal_handler(SIGPIPE);
   set_signal_handler(SIGBUS);
   set_signal_handler(SIGILL);
   set_signal_handler(SIGFPE);
-  set_signal_handler(SIGUSR1); // mdf
+  set_signal_handler(SIGUSR1);
   PPC64_ONLY(set_signal_handler(SIGTRAP);)
   set_signal_handler(SIGXFSZ);
   if (!ReduceSignalUsage) {
@@ -1477,13 +1512,14 @@ void PosixSignals::print_signal_handler(outputStream* st, int sig,
 
 void os::print_signal_handlers(outputStream* st, char* buf, size_t buflen) {
   st->print_cr("Signal Handlers:");
+// mdf: calling print_signal_handler() with SIGUSR1
   PosixSignals::print_signal_handler(st, SIGSEGV, buf, buflen);
   PosixSignals::print_signal_handler(st, SIGBUS , buf, buflen);
   PosixSignals::print_signal_handler(st, SIGFPE , buf, buflen);
   PosixSignals::print_signal_handler(st, SIGPIPE, buf, buflen);
   PosixSignals::print_signal_handler(st, SIGXFSZ, buf, buflen);
   PosixSignals::print_signal_handler(st, SIGILL , buf, buflen);
-  PosixSignals::print_signal_handler(st, SIGUSR1 , buf, buflen); // mdf
+  PosixSignals::print_signal_handler(st, SIGUSR1 , buf, buflen);
   PosixSignals::print_signal_handler(st, PosixSignals::SR_signum, buf, buflen);
   PosixSignals::print_signal_handler(st, SHUTDOWN1_SIGNAL, buf, buflen);
   PosixSignals::print_signal_handler(st, SHUTDOWN2_SIGNAL , buf, buflen);
@@ -1527,12 +1563,13 @@ static void signal_sets_init() {
   // (See bug 4345157, and other related bugs).
   // In reality, though, unblocking these signals is really a nop, since
   // these signals are not blocked by default.
+// mdf: calling sigaddset() with SIGUSR1
   sigemptyset(&unblocked_sigs);
   sigaddset(&unblocked_sigs, SIGILL);
   sigaddset(&unblocked_sigs, SIGSEGV);
   sigaddset(&unblocked_sigs, SIGBUS);
   sigaddset(&unblocked_sigs, SIGFPE);
-  sigaddset(&unblocked_sigs, SIGUSR1); // mdf
+  sigaddset(&unblocked_sigs, SIGUSR1);
   PPC64_ONLY(sigaddset(&unblocked_sigs, SIGTRAP);)
   sigaddset(&unblocked_sigs, PosixSignals::SR_signum);
 

@@ -121,7 +121,11 @@ void VM_G1CollectForAllocation::doit() {
   _gc_succeeded = g1h->do_collection_pause_at_safepoint();
   assert(_gc_succeeded, "no reason to fail");
 
-  if (_word_size > 0) {
+// mdf: skip full GC if EMEs occurred
+  if (Universe::heap()->get_emes_during_gc() && Universe::heap()->hash_recorder()->length() != 0) {
+    _gc_succeeded = false;
+  } else if (_word_size > 0) {
+//  if (_word_size > 0) {
     // An allocation had been requested. Do it, eventually trying a stronger
     // kind of GC.
     _result = g1h->satisfy_failed_allocation(_word_size, &_gc_succeeded);

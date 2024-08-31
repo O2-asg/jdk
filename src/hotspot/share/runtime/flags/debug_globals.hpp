@@ -85,7 +85,7 @@
                                                                             \
   product(double, TestFlagFor_double, 0.0,                                  \
           "Used by VM internal regression tests only")                      \
-
+									    \
 // end of DEBUG_RUNTIME_FLAGS
 
 #endif // ASSERT

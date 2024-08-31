@@ -650,7 +650,7 @@ protected:
     return cur != nullptr && cur->in_asgct();
   }
 
-// mdf
+// mdf: mainThread flag declaration
 	bool _is_in_mainthread = false;
  public:
 	bool is_in_mainthread() const { return _is_in_mainthread; }

@@ -19,6 +19,7 @@ class objNode: public CHeapObj<mtGC>{
 private:
 	size_t size; // object size
 	jweak obj; // jni weak global reference (address)
+	uintptr_t before_addr;
 	intptr_t hash; // identity hash code
 	objNode* next;
 
@@ -26,6 +27,7 @@ public:
 	objNode(size_t size, jweak obj, intptr_t hash) {
 		this->size = size;
 		this->obj = obj;
+		this->before_addr = 0;
 		this->hash = hash;
 		this->next = nullptr;
 	}
@@ -46,6 +48,7 @@ public:
 	void deleteobjNode(uintptr_t addr);
 	intptr_t getHashFromAddr(uintptr_t addr);
 	void showobjTable(void);
+	void recordBeforeAddr(uintptr_t addr);
 };
 
 #endif

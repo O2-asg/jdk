@@ -857,7 +857,8 @@ address SharedRuntime::continuation_for_implicit_exception(JavaThread* current,
       case IMPLICIT_NULL:           return Interpreter::throw_NullPointerException_entry();
       case IMPLICIT_DIVIDE_BY_ZERO: return Interpreter::throw_ArithmeticException_entry();
       case STACK_OVERFLOW:          return Interpreter::throw_StackOverflowError_entry();
-      case EME:            return Interpreter::throw_ECCuncorrectableMemoryException_entry(); // mdf
+// mdf: handling EME signal at continuation_for_implicit_exception()
+      case EME:            return Interpreter::throw_ECCuncorrectableMemoryException_entry();
       default:                      ShouldNotReachHere();
     }
   } else {
@@ -3108,13 +3109,41 @@ void SharedRuntime::on_slowpath_allocation_exit(JavaThread* current) {
   bs->on_slowpath_allocation_exit(current, new_obj);
 }
 
-// mdf: function register_TLAB_object()
+// mdf: definition of register_TLAB_object()
 int SharedRuntime::register_TLAB_object(oopDesc *o) {
 	Thread* cur = Thread::current();
 
 	if (cur->is_in_mainthread()) {
-		Universe::heap()->objtbl()->addobjNode(cur, o);
+		if (Universe::heap()->kind() == CollectedHeap::G1)
+			Universe::heap()->objtbl()->addobjNode(cur, o);
+/*		FILE *fp = fopen("/home/vmuser/jdk/mylogfile.log", "a");
+		fprintf(fp, "SRT::_new: addr is %lx, hash is %lx\n",
+			p2i(o), o->identity_hash());
+		fclose(fp);*/
 	}
 
 	return 0;
+}
+
+// mdf: definition of procfs_addr()
+uintptr_t SharedRuntime::procfs_addr(void)
+{
+	int pid = os::current_thread_id();
+	char procfs_name[50], procfs_content[50];
+	uintptr_t addr;
+
+	os::snprintf(procfs_name, 50, "/proc/%d_addresses", pid); // get file name
+
+	FILE *fp = fopen(procfs_name, "r");
+	if (fp == NULL) return 0;
+
+	if (fscanf(fp, "%s", procfs_content) < 0) {
+		fclose(fp);
+		return 0;
+	}
+	fclose(fp);
+
+	addr = (uintptr_t)strtol(procfs_content, NULL, 16);
+
+	return addr;
 }

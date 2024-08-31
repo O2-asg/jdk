@@ -1717,7 +1717,16 @@ JNI_ENTRY(void, jni_CallStaticVoidMethod(JNIEnv *env, jclass cls, jmethodID meth
 
 	// mdf: enable mainthread flag
 	if (thread != nullptr && thread->is_Java_thread()) {
-//		thread->set_is_in_mainthread(true);
+		thread->set_is_in_mainthread(true);
+	}
+	if (MyDebugFlag) {
+		FILE *fp = fopen("/home/vmuser/jdk/mylogfile.log", "a");
+		fprintf(fp, "Debug flag is enabled.\n");
+		fclose(fp);
+	} else {
+		FILE *fp = fopen("/home/vmuser/jdk/mylogfile.log", "a");
+		fprintf(fp, "Debug flag is disabled.\n");
+		fclose(fp);
 	}
 
   jni_invoke_static(env, &jvalue, nullptr, JNI_STATIC, methodID, &ap, CHECK);

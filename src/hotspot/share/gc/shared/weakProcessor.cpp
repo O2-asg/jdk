@@ -119,11 +119,5 @@ void WeakProcessor::Task::report_num_dead() {
 }
 
 void WeakProcessor::WeakOopsDoTask::work(uint worker_id) {
-FILE *fp = fopen("/home/vmuser/jdk/mylogfile.log", "a");
-fprintf(fp, "started WeakProcessor::WeakOopsDoTask::work(uint worker_id = %d)\n", worker_id);
-fclose(fp);
   _erased_do_work(this, worker_id);
-fp = fopen("/home/vmuser/jdk/mylogfile.log", "a");
-fprintf(fp, "finished WeakProcessor::WeakOopsDoTask::work(uint worker_id = %d)\n", worker_id);
-fclose(fp);
 }

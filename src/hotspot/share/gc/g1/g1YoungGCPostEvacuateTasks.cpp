@@ -981,7 +981,10 @@ G1PostEvacuateCollectionSetCleanupTask2::G1PostEvacuateCollectionSetCleanupTask2
   if (UseTLAB && ResizeTLAB) {
     add_parallel_task(new ResizeTLABsTask());
   }
+// mdf: disable freeing cset when EMEs
+	if (!Universe::heap()->get_emes_during_gc() || Universe::heap()->hash_recorder()->length() == 0) {
   add_parallel_task(new FreeCollectionSetTask(evacuation_info,
                                               per_thread_states->surviving_young_words(),
                                               evac_failure_regions));
+	}
 }

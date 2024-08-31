@@ -239,7 +239,7 @@ JRT_ENTRY(void, InterpreterRuntime::_new(JavaThread* current, ConstantPool* pool
   //       because the _breakpoint bytecode would be lost.
   oop obj = klass->allocate_instance(CHECK);
 
-	// mdf
+// mdf: record normal oop
 	if (current->is_in_mainthread()) {
 		if (Universe::heap()->kind() == CollectedHeap::G1)
 			Universe::heap()->objtbl()->addobjNode(current, obj);
@@ -256,10 +256,11 @@ JRT_END
 JRT_ENTRY(void, InterpreterRuntime::newarray(JavaThread* current, BasicType type, jint size))
   oop obj = oopFactory::new_typeArray(type, size, CHECK);
 
-	// mdf
+// mdf: record typeArray oop
 	if (current->is_in_mainthread()) {
-		if (Universe::heap()->kind() == CollectedHeap::G1)
+		if (Universe::heap()->kind() == CollectedHeap::G1) {
 			Universe::heap()->objtbl()->addobjNode(current, obj);
+		}
 	}
 
   current->set_vm_result(obj);
@@ -270,10 +271,14 @@ JRT_ENTRY(void, InterpreterRuntime::anewarray(JavaThread* current, ConstantPool*
   Klass*    klass = pool->klass_at(index, CHECK);
   objArrayOop obj = oopFactory::new_objArray(klass, size, CHECK);
 
-	// mdf
+// mdf: record referenceArray oop
 	if (current->is_in_mainthread()) {
-		if (Universe::heap()->kind() == CollectedHeap::G1)
+		if (Universe::heap()->kind() == CollectedHeap::G1) {
 			Universe::heap()->objtbl()->addobjNode(current, obj);
+/*			FILE *fp = fopen("/home/vmuser/jdk/mylogfile.log", "a");
+			fprintf(fp, "IRT::anewarray: addr is %lx, size is %d\n", p2i(obj), size);
+			fclose(fp);*/
+		}
 	}
 
   current->set_vm_result(obj);
@@ -305,7 +310,7 @@ JRT_ENTRY(void, InterpreterRuntime::multianewarray(JavaThread* current, jint* fi
   }
   oop obj = ArrayKlass::cast(klass)->multi_allocate(nof_dims, dims, CHECK);
 
-	// mdf
+// mdf: record oop of array?
 	if (current->is_in_mainthread()) {
 		if (Universe::heap()->kind() == CollectedHeap::G1)
 			Universe::heap()->objtbl()->addobjNode(current, obj);
@@ -688,7 +693,7 @@ JRT_ENTRY(void, InterpreterRuntime::throw_NullPointerException(JavaThread* curre
   THROW(vmSymbols::java_lang_NullPointerException());
 JRT_END
 
-// mdf
+// mdf: definition of throw_EME()
 JRT_ENTRY(void, InterpreterRuntime::throw_ECCuncorrectableMemoryException(JavaThread* current))
 	THROW(vmSymbols::java_lang_ECCuncorrectableMemoryException());
 JRT_END

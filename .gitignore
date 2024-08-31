@@ -25,3 +25,4 @@ NashornProfile.txt
 /.cache
 test/mytest/*.class
 src/hotspot/cscope.out
+*.log

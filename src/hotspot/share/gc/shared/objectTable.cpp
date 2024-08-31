@@ -1,3 +1,5 @@
+// mdf: objectTable.cpp
+
 #include "objectTable.hpp"
 #include "oops/oop.hpp" // to use identity_hash()
 #include "oops/oop.inline.hpp" // to use identity_hash()
@@ -25,7 +27,6 @@ void objTable::deleteobjNode_internal(objNode* target)
 	oop o = JNIHandles::resolve(target->obj);
 
 	if (o != nullptr) { // object is still live
-		target->obj = nullptr;
 		return; // keep tracking
 	} else { // object has been dead
 		JNIHandles::destroy_weak_global(target->obj);
@@ -70,7 +71,7 @@ void objTable::deleteobjNode(uintptr_t addr)
 
 intptr_t objTable::getHashFromAddr(uintptr_t addr)
 {
-	int i;
+	if (addr == 0) return 0;
 	uintptr_t start, end;
 	oop tmp;
 	objNode *n;
@@ -104,10 +105,11 @@ void objTable::showobjTable(void)
 	while (n->next != nullptr) {
 		o = JNIHandles::resolve(n->next->obj);
 		if (o != nullptr) {
-			fprintf(fp, "showobjTable: hash is %lx, addr is %lx, size is %ld\n",
-				n->next->hash, p2i(o), n->next->size);
+			fprintf(fp, "showobjTable: hash is %lx, addr is %lx, before addr is %lx, size is %ld\n",
+				n->next->hash, p2i(o), n->next->before_addr, n->next->size);
 		} else { // original object has been deleted (collected)
 			deleteobjNode_internal(n->next);
+			fprintf(fp, "removed a record\n");
 			n->next = n->next->next;
 			continue;
 		}
@@ -115,4 +117,20 @@ void objTable::showobjTable(void)
 	}
 
 	fclose(fp);
+}
+
+void objTable::recordBeforeAddr(uintptr_t addr)
+{
+	oop tmp;
+	objNode *n;
+
+	n = this->head;
+	while (n != nullptr) {
+		tmp = JNIHandles::resolve(n->obj);
+		if ((uintptr_t)p2i(tmp) == addr) {
+			n->before_addr = (uintptr_t)p2i(tmp);
+			return;
+		}
+		n = n->next;
+	}
 }

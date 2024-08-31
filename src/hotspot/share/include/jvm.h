@@ -234,7 +234,7 @@ JVM_InitStackTraceElement(JNIEnv* env, jobject element, jobject stackFrameInfo);
 JNIEXPORT jstring JNICALL
 JVM_GetExtendedNPEMessage(JNIEnv *env, jthrowable throwable);
 
-// mdf
+// mdf: declaration of getHash() JNI function
 JNIEXPORT jint JNICALL
 JVM_GetBrokenObjectHash(JNIEnv *env, jthrowable throwable);
 

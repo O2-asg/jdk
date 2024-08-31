@@ -214,7 +214,8 @@ void G1FullCollector::collect() {
 
   phase2_prepare_compaction();
 
-  if (has_compaction_targets()) {
+// mdf: execute compaction iff compaction target exists and no EMEs occurred
+  if (has_compaction_targets() && !Universe::heap()->get_emes_during_gc()) {
     phase3_adjust_pointers();
 
     phase4_do_compaction();

@@ -1994,6 +1994,9 @@ const int ObjectAlignmentInBytes = 8;
                 "Unconditionally record nmethod dependencies on class "     \
                 "rewriting/transformation independently of the JVMTI "      \
                 "can_{retransform/redefine}_classes capabilities.")         \
+									    \
+product(bool, MyDebugFlag, false,					    \
+         "Used by my debug purpose")					    \
 
 // end of RUNTIME_FLAGS
 
